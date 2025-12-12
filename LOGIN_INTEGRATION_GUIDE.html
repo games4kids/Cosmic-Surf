@@ -1,0 +1,681 @@
+<!-- 
+  COSMIC SURFER 3D - LOGIN SYSTEM INTEGRATION
+  
+  Questo file contiene le modifiche da aggiungere a index.html per integrare il sistema di login.
+  
+  ISTRUZIONI:
+  1. Aggiungi gli stili CSS nella sezione <style> (dopo line 384)
+  2. Aggiungi gli elementi HTML nel <body> (dopo line 399)
+  3. Aggiungi il JavaScript alla fine dello script (prima della chiusura </script>)
+-->
+
+<!-- ========== CSS DA AGGIUNGERE (dopo line 384) ========== -->
+<style>
+    /* Login/Register Modal Styles */
+    .auth-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at center, rgba(10, 14, 39, 0.98) 0%, rgba(0, 0, 0, 0.99) 100%);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        pointer-events: all;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .auth-container {
+        background: rgba(26, 31, 58, 0.9);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 450px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3), 0 0 0 1px rgba(0, 212, 255, 0.2);
+        backdrop-filter: blur(20px);
+    }
+
+    .auth-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 30px;
+        background: linear-gradient(135deg, #00d4ff, #00ffaa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .form-input {
+        padding: 15px 20px;
+        border: 2px solid rgba(0, 212, 255, 0.3);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .form-input:focus {
+        border-color: #00d4ff;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .form-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .auth-button {
+        padding: 15px 30px;
+        background: linear-gradient(135deg, #00d4ff, #00ffaa);
+        color: #0a0e27;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 10px;
+    }
+
+    .auth-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 212, 255, 0.5);
+    }
+
+    .auth-button:active {
+        transform: translateY(0);
+    }
+
+    .auth-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .auth-toggle {
+        text-align: center;
+        margin-top: 20px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .auth-toggle-link {
+        color: #00d4ff;
+        cursor: pointer;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+
+    .auth-toggle-link:hover {
+        color: #00ffaa;
+    }
+
+    .auth-error {
+        background: rgba(255, 0, 0, 0.2);
+        border: 1px solid rgba(255, 0, 0, 0.5);
+        color: #ff6b6b;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-align: center;
+        margin-bottom: 15px;
+        display: none;
+    }
+
+    .auth-error.show {
+        display: block;
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-10px);
+        }
+
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .user-info {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        z-index: 25;
+        pointer-events: none;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .user-info span {
+        color: #00d4ff;
+        font-weight: 700;
+    }
+
+    .logout-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 8px 20px;
+        background: rgba(255, 0, 110, 0.8);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        z-index: 25;
+        pointer-events: all;
+        transition: all 0.3s ease;
+    }
+
+    .logout-button:hover {
+        background: rgba(255, 0, 110, 1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 0, 110, 0.5);
+    }
+
+    .leaderboard {
+        background: rgba(26, 31, 58, 0.8);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        max-width: 400px;
+        border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .leaderboard-title {
+        color: #00d4ff;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-align: center;
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+    }
+
+    .leaderboard-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .leaderboard-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 15px;
+        margin-bottom: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        color: white;
+        font-size: 0.95rem;
+    }
+
+    .leaderboard-item:nth-child(1) {
+        background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(0, 0, 0, 0.3));
+        border-left: 3px solid #FFD700;
+    }
+
+    .leaderboard-item:nth-child(2) {
+        background: linear-gradient(90deg, rgba(192, 192, 192, 0.2), rgba(0, 0, 0, 0.3));
+        border-left: 3px solid #C0C0C0;
+    }
+
+    .leaderboard-item:nth-child(3) {
+        background: linear-gradient(90deg, rgba(205, 127, 50, 0.2), rgba(0, 0, 0, 0.3));
+        border-left: 3px solid #CD7F32;
+    }
+
+    .leaderboard-rank {
+        font-weight: 700;
+        color: #00d4ff;
+        margin-right: 10px;
+    }
+
+    .leaderboard-username {
+        flex: 1;
+        font-weight: 600;
+    }
+
+    .leaderboard-score {
+        font-weight: 700;
+        color: #00ffaa;
+    }
+
+    .personal-best {
+        text-align: center;
+        margin-top: 15px;
+        padding: 12px;
+        background: rgba(0, 212, 255, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(0, 212, 255, 0.3);
+    }
+
+    .personal-best-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+    }
+
+    .personal-best-score {
+        color: #00d4ff;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+    }
+</style>
+
+<!-- ========== HTML DA AGGIUNGERE (dopo line 399, dentro ui-overlay) ========== -->
+
+<!-- Login/Register Modal -->
+<div class="auth-modal" id="authModal" style="display: none;">
+    <div class="auth-container">
+        <h2 class="auth-title" id="authTitle">Login</h2>
+
+        <div class="auth-error" id="authError"></div>
+
+        <!-- Login Form -->
+        <form class="auth-form" id="loginForm">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-input" id="loginUsername" placeholder="Inserisci username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="loginPassword" placeholder="Inserisci password" required>
+            </div>
+            <button type="submit" class="auth-button" id="loginButton">Accedi</button>
+        </form>
+
+        <!-- Register Form -->
+        <form class="auth-form" id="registerForm" style="display: none;">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-input" id="registerUsername"
+                    placeholder="Scegli username (min 3 caratteri)" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email (opzionale)</label>
+                <input type="email" class="form-input" id="registerEmail" placeholder="email@esempio.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-input" id="registerPassword"
+                    placeholder="Scegli password (min 6 caratteri)" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Conferma Password</label>
+                <input type="password" class="form-input" id="registerConfirmPassword" placeholder="Ripeti password"
+                    required>
+            </div>
+            <button type="submit" class="auth-button" id="registerButton">Registrati</button>
+        </form>
+
+        <div class="auth-toggle">
+            <span id="toggleText">Non hai un account?</span>
+            <span class="auth-toggle-link" id="toggleLink">Registrati</span>
+        </div>
+    </div>
+</div>
+
+<!-- User Info Display -->
+<div class="user-info" id="userInfo" style="display: none;">
+    👤 <span id="usernameDisplay"></span> | 🏆 Record: <span id="userRecord">0</span>
+</div>
+
+<!-- Logout Button -->
+<button class="logout-button" id="logoutButton" style="display: none;">Logout</button>
+
+<!-- ========== JAVASCRIPT DA AGGIUNGERE (prima della chiusura </script>) ========== -->
+<script>
+    // ===== USER AUTHENTICATION SYSTEM =====
+    const API_BASE = './api'; // Adjust if needed
+
+    let currentUser = null;
+    let isLoggedIn = false;
+
+    // Check session on page load
+    async function checkSession() {
+        try {
+            const response = await fetch(`${API_BASE}/check-session.php`);
+            const data = await response.json();
+
+            if (data.success && data.loggedIn) {
+                currentUser = data.user;
+                isLoggedIn = true;
+                showUserInfo();
+                hideAuthModal();
+                loadLeaderboard();
+            } else {
+                showAuthModal();
+            }
+        } catch (error) {
+            console.error('Session check failed:', error);
+            showAuthModal();
+        }
+    }
+
+    // Show/Hide Auth Modal
+    function showAuthModal() {
+        document.getElementById('authModal').style.display = 'flex';
+        document.getElementById('menuScreen').style.display = 'none';
+    }
+
+    function hideAuthModal() {
+        document.getElementById('authModal').style.display = 'none';
+        document.getElementById('menuScreen').style.display = 'flex';
+    }
+
+    // Show/Hide User Info
+    function showUserInfo() {
+        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'block';
+        document.getElementById('usernameDisplay').textContent = currentUser.username;
+        document.getElementById('userRecord').textContent = currentUser.record;
+    }
+
+    function hideUserInfo() {
+        document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('logoutButton').style.display = 'none';
+    }
+
+    // Show Error Message
+    function showError(message) {
+        const errorEl = document.getElementById('authError');
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+        setTimeout(() => errorEl.classList.remove('show'), 5000);
+    }
+
+    // Toggle between Login and Register
+    document.getElementById('toggleLink').addEventListener('click', () => {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const authTitle = document.getElementById('authTitle');
+        const toggleText = document.getElementById('toggleText');
+        const toggleLink = document.getElementById('toggleLink');
+
+        if (loginForm.style.display === 'none') {
+            // Switch to Login
+            loginForm.style.display = 'flex';
+            registerForm.style.display = 'none';
+            authTitle.textContent = 'Login';
+            toggleText.textContent = 'Non hai un account?';
+            toggleLink.textContent = 'Registrati';
+        } else {
+            // Switch to Register
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'flex';
+            authTitle.textContent = 'Registrazione';
+            toggleText.textContent = 'Hai già un account?';
+            toggleLink.textContent = 'Accedi';
+        }
+    });
+
+    // Handle Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        const loginButton = document.getElementById('loginButton');
+        loginButton.disabled = true;
+        loginButton.textContent = 'Accesso in corso...';
+
+        try {
+            const response = await fetch(`${API_BASE}/login.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentUser = data.user;
+                isLoggedIn = true;
+                showUserInfo();
+                hideAuthModal();
+                loadLeaderboard();
+
+                // Clear form
+                document.getElementById('loginForm').reset();
+            } else {
+                showError(data.error || 'Login fallito');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showError('Errore di connessione al server');
+        } finally {
+            loginButton.disabled = false;
+            loginButton.textContent = 'Accedi';
+        }
+    });
+
+    // Handle Register
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('registerUsername').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            showError('Le password non corrispondono');
+            return;
+        }
+
+        const registerButton = document.getElementById('registerButton');
+        registerButton.disabled = true;
+        registerButton.textContent = 'Registrazione in corso...';
+
+        try {
+            const response = await fetch(`${API_BASE}/register.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentUser = data.user;
+                isLoggedIn = true;
+                showUserInfo();
+                hideAuthModal();
+                loadLeaderboard();
+
+                // Clear form
+                document.getElementById('registerForm').reset();
+            } else {
+                showError(data.error || 'Registrazione fallita');
+            }
+        } catch (error) {
+            console.error('Register error:', error);
+            showError('Errore di connessione al server');
+        } finally {
+            registerButton.disabled = false;
+            registerButton.textContent = 'Registrati';
+        }
+    });
+
+    // Handle Logout
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+        try {
+            await fetch(`${API_BASE}/logout.php`, { method: 'POST' });
+
+            currentUser = null;
+            isLoggedIn = false;
+            hideUserInfo();
+            showAuthModal();
+
+            // Reset game if playing
+            if (gameState === 'playing') {
+                gameState = 'menu';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    });
+
+    // Update Score on Game Over
+    async function saveScore(finalScore) {
+        if (!isLoggedIn) return;
+
+        try {
+            const response = await fetch(`${API_BASE}/update-score.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ score: finalScore })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentUser.record = data.record;
+                document.getElementById('userRecord').textContent = data.record;
+
+                if (data.isNewRecord) {
+                    // Show new record message
+                    const finalScoreEl = document.getElementById('finalScore');
+                    finalScoreEl.innerHTML = `
+          Punteggio Finale: ${finalScore}<br>
+          <span style="color: #00ffaa; font-size: 1.2rem;">🎉 NUOVO RECORD! 🎉</span>
+        `;
+                }
+
+                // Reload leaderboard
+                loadLeaderboard();
+            }
+        } catch (error) {
+            console.error('Save score error:', error);
+        }
+    }
+
+    // Load Leaderboard
+    async function loadLeaderboard() {
+        try {
+            const response = await fetch(`${API_BASE}/get-leaderboard.php`);
+            const data = await response.json();
+
+            if (data.success && data.leaderboard) {
+                displayLeaderboard(data.leaderboard);
+            }
+        } catch (error) {
+            console.error('Leaderboard error:', error);
+        }
+    }
+
+    // Display Leaderboard in Game Over Screen
+    function displayLeaderboard(leaderboard) {
+        const gameOverScreen = document.getElementById('gameOverScreen');
+
+        // Remove existing leaderboard if any
+        const existingLeaderboard = gameOverScreen.querySelector('.leaderboard');
+        if (existingLeaderboard) {
+            existingLeaderboard.remove();
+        }
+
+        // Create leaderboard element
+        const leaderboardEl = document.createElement('div');
+        leaderboardEl.className = 'leaderboard';
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'leaderboard-title';
+        titleEl.textContent = '🏆 TOP 10 GIOCATORI';
+        leaderboardEl.appendChild(titleEl);
+
+        const listEl = document.createElement('ul');
+        listEl.className = 'leaderboard-list';
+
+        leaderboard.forEach((player, index) => {
+            const itemEl = document.createElement('li');
+            itemEl.className = 'leaderboard-item';
+            itemEl.innerHTML = `
+      <span class="leaderboard-rank">#${index + 1}</span>
+      <span class="leaderboard-username">${player.username}</span>
+      <span class="leaderboard-score">${player.record}</span>
+    `;
+            listEl.appendChild(itemEl);
+        });
+
+        leaderboardEl.appendChild(listEl);
+
+        // Add personal best
+        if (currentUser) {
+            const personalBestEl = document.createElement('div');
+            personalBestEl.className = 'personal-best';
+            personalBestEl.innerHTML = `
+      <div class="personal-best-label">Il Tuo Record</div>
+      <div class="personal-best-score">${currentUser.record}</div>
+    `;
+            leaderboardEl.appendChild(personalBestEl);
+        }
+
+        gameOverScreen.appendChild(leaderboardEl);
+    }
+
+    // Initialize auth system on page load
+    window.addEventListener('load', () => {
+        checkSession();
+    });
+
+    // MODIFY endGame() function to save score
+    // Find the existing endGame() function and add this at the end:
+    /*
+    const originalEndGame = endGame;
+    endGame = function() {
+      originalEndGame();
+      saveScore(score);
+    };
+    */
+</script>
+
+<!-- 
+  NOTA FINALE:
+  Dopo aver aggiunto tutto il codice sopra, modifica la funzione endGame() esistente
+  aggiungendo questa riga alla fine della funzione:
+  
+  saveScore(score);
+  
+  Questo salverà automaticamente il punteggio quando il gioco finisce.
+-->
